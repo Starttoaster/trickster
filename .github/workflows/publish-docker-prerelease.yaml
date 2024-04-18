@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Add safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: actions/checkout@v4
 
       - name: Set up QEMU
