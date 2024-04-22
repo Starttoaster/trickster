@@ -1,4 +1,4 @@
-name: Publish docker image on main and releases
+name: Publish docker image
 
 on:
   push:
@@ -6,8 +6,6 @@ on:
       - main
       - v1.0.x
       - v1.1.x
-  release:
-    types: [released]
   workflow_dispatch:
   schedule:
     # Monday at 9am UTC
@@ -22,11 +20,21 @@ jobs:
   package:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Need this matrix because GitHub doesn't support running scheduled workflows against non-default branches
+    # This checks out each branch listed here, and there are separate docker meta and build steps for each branch in the matrix.
+    strategy:
+      matrix:
+        branch:
+          - main
+          - v1.0.x
+          - v1.1.x
     steps:
       - name: Add safe git directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -41,27 +49,74 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Docker meta
-        id: meta
+      - name: Docker meta on main
+        if: matrix.branch == 'main'
+        id: meta-main
         uses: docker/metadata-action@v5
         with:
           images: |
             ghcr.io/${{ github.repository }}
           flavor: |
-            latest=auto
+            latest=false
             prefix=
             suffix=
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=sha,format=long
 
-      - name: Build Docker Container
+      - name: Build Docker Container on main
+        if: matrix.branch == 'main'
         uses: docker/build-push-action@v5
         with:
           platforms: "linux/amd64,linux/arm64"
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-main.outputs.tags }}
+          labels: ${{ steps.meta-main.outputs.labels }}
+
+      - name: Docker meta on v1.0.x
+        if: matrix.branch == 'v1.0.x'
+        id: meta-v1dot0
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
+            prefix=
+            suffix=
+          tags: |
+            type=raw,value=1.0
+            type=sha,format=long
+
+      - name: Build Docker Container on v1.0.x
+        if: matrix.branch == 'v1.0.x'
+        uses: docker/build-push-action@v5
+        with:
+          platforms: "linux/amd64,linux/arm64"
+          push: true
+          tags: ${{ steps.meta-v1dot0.outputs.tags }}
+          labels: ${{ steps.meta-v1dot0.outputs.labels }}
+
+      - name: Docker meta on v1.1.x
+        if: matrix.branch == 'v1.1.x'
+        id: meta-v1dot1
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
+            prefix=
+            suffix=
+          tags: |
+            type=raw,value=1.1
+            type=sha,format=long
+
+      - name: Build Docker Container on v1.1.x
+        if: matrix.branch == 'v1.1.x'
+        uses: docker/build-push-action@v5
+        with:
+          platforms: "linux/amd64,linux/arm64"
+          push: true
+          tags: ${{ steps.meta-v1dot1.outputs.tags }}
+          labels: ${{ steps.meta-v1dot1.outputs.labels }}
