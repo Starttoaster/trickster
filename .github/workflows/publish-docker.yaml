@@ -1,0 +1,39 @@
+name: Publish docker image matrix
+
+on:
+  push:
+    branches:
+      - main
+      - v1.0.x
+      - v1.1.x
+  workflow_dispatch:
+  schedule:
+    # Monday at 9am UTC
+    - cron: '0 9 * * 1'
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Need this matrix because GitHub doesn't support running scheduled workflows against non-default branches
+    strategy:
+      matrix:
+        branch:
+          - main
+          - v1.0.x
+          - v1.1.x
+    steps:
+      - name: Add safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: actions/checkout@v4
+
+      - name: Trigger docker publish workflow ${{ matrix.branch }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run reusable-docker-publish.yaml --ref ${{ matrix.branch }}
