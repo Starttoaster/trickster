@@ -28,6 +28,11 @@ jobs:
           - v1.0.x
           - v1.1.x
     steps:
+      - name: Add safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: actions/checkout@v4
+
       - name: Trigger docker publish workflow ${{ matrix.branch }}
         env:
           GH_TOKEN: ${{ github.token }}
