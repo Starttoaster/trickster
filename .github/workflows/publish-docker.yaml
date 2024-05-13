@@ -6,6 +6,7 @@ on:
       - main
       - v1.0.x
       - v1.1.x
+      - ci-matrix
   workflow_dispatch:
   schedule:
     # Monday at 9am UTC
