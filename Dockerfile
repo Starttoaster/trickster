@@ -3,7 +3,7 @@ FROM golang:1 AS builder
 COPY . /go/src/github.com/trickstercache/trickster
 WORKDIR /go/src/github.com/trickstercache/trickster
 
-RUN GOOS=linux CGO_ENABLED=0 make build
+RUN CGO_ENABLED=0 go build -o ./OPATH/trickster -a -v cmd/trickster/*.go
 
 FROM gcr.io/distroless/static-debian12
 
