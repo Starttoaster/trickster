@@ -53,7 +53,7 @@ test-go-mod:
 	@git diff --quiet --exit-code go.mod go.sum || echo "There are changes to go.mod and go.sum which needs to be committed"
 
 .PHONY: build
-build: go-mod-tidy go-mod-vendor
+build: go-mod-tidy
 	GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(LDFLAGS) -o ./$(BUILD_SUBDIR)/trickster -a -v $(TRICKSTER_MAIN)/*.go
 
 rpm: build
@@ -73,7 +73,7 @@ install:
 	$(GO) install -o $(TRICKSTER) $(PROGVER)
 
 .PHONY: release
-release: validate-app-version clean go-mod-tidy go-mod-vendor release-artifacts
+release: validate-app-version clean go-mod-tidy release-artifacts
 
 .PHONY: release-artifacts
 release-artifacts: clean
@@ -118,7 +118,7 @@ kube-local:
 
 .PHONY: docker
 docker:
-	docker build --build-arg IMAGE_ARCH=$(IMAGE_ARCH) --build-arg GOARCH=$(GOARCH) -f ./deploy/Dockerfile -t trickster:$(PROGVER) .
+	docker build -f ./deploy/Dockerfile -t trickster .
 
 .PHONY: docker-release
 docker-release:

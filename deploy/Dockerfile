@@ -13,7 +13,7 @@ RUN wget -O go.src.tar.gz https://go.dev/dl/go1.16.15.src.tar.gz; \
     tar -C /usr/local -xzf go.src.tar.gz; \
     rm go.src.tar.gz; \
     cd /usr/local/go/src; \
-    ./make.bash; 
+    ./make.bash;
 COPY . /go/src/github.com/trickstercache/trickster
 WORKDIR /go/src/github.com/trickstercache/trickster
 
