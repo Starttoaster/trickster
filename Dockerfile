@@ -1,10 +1,10 @@
-FROM golang:alpine as builder
+FROM golang:alpine AS builder
 RUN apk add --no-cache bash gcc musl-dev openssl make;
 
-COPY . /go/src/github.com/starttoaster/trickster
-WORKDIR /go/src/github.com/starttoaster/trickster
+COPY . /go/src/github.com/trickstercache/trickster
+WORKDIR /go/src/github.com/trickstercache/trickster
 
-RUN GOOS=linux GOARCH=${GOARCH} CGO_ENABLED=0 make build
+RUN GOOS=linux CGO_ENABLED=0 make build
 
 FROM alpine:latest
 
