@@ -40,10 +40,6 @@ validate-app-version:
 		(echo "mismatch between TAGVER '$(TAGVER)' and applicationVersion '$(PROGVER)'"; exit 1);\
 	fi
 
-.PHONY: go-mod-vendor
-go-mod-vendor:
-	$(GO) mod vendor
-
 .PHONY: go-mod-tidy
 go-mod-tidy:
 	$(GO) mod tidy
